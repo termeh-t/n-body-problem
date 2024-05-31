@@ -1,82 +1,43 @@
 import numpy as np
 
-import matplotlib
-
 G = 6.6743e-11
 
 class Mass():
     
-    def __init__ (self, x, y, z, mass, intialVelocityX, intialVelocityY, initialVelocityZ):
-            
-        self.x = x
-        self.y = y
-        self.z = z
+    def __init__ (self, position, mass, initialVelocity):
+        self.position = np.array(position, dtype=float)
         self.mass = mass
-        self.velocityX = intialVelocityX
-        self.velocityY = intialVelocityY
-        self.velocityZ = initialVelocityZ
+        self.velocity = np.array(initialVelocity, dtype=float)
 
-    def calculate_Magnitute_Vector(self):
-        
-        a = (self.x**2 + self.y**2 + self.z**2)**(1/2)
-
-        return (self.x**2 + self.y**2 + self.z**2)**(1/2)
+    def calculate_magnitude_vector(self):
+        return np.linalg.norm(self.position)
     
-    def calculate_Magnitute_Acceleration(self):
-
-        a = calculate_Gravitaional_Law()/self.mass 
-
-        return calculate_Gravitaional_Law()/self.mass 
+    def calculate_magnitude_acceleration(self, other_mass):
+        radius_vector = other_mass.position - self.position
+        radius = np.linalg.norm(radius_vector)
+        return G * other_mass.mass / (radius ** 3) * radius_vector
     
-    def calculate_position(self):
-
-        print(self.x, self.y, self.z)
-
-
-m1 = Mass(0.0, 0.0, 0.0, 10e10, 0.0, 0.0, 0.0)
-m2 = Mass(10.0, 10.0, 10.0, 20e10, 0.0, 0.0, 0.0)
-
-def calculate_Magnitute_radius():
-
-    return Mass.calculate_Magnitute_Vector(m1) - Mass.calculate_Magnitute_Vector(m2) 
+    def calculate_position(self, acceleration, time_step):
+        self.position += self.velocity * time_step + 0.5 * acceleration * (time_step ** 2)
+        self.velocity += acceleration * time_step
 
 
-def calculate_Gravitaional_Law():
+m1 = Mass([0.0, 0.0, 0.0], 10e10, [0.0, 0.0, 0.0])
+m2 = Mass([10.0, 10.0, 10.0], 20e10, [0.0, 0.0, 0.0])
 
-    a = G*m1.mass*m2.mass/calculate_Magnitute_radius()
-
-    return G*m1.mass*m2.mass/calculate_Magnitute_radius()
-
-
-
-def calculate_coordinate(m : Mass):    
+def calculate_coordinates(m1, m2):
+    time_step = 0.1
+    for _ in range(2000):
         
-    timediff = 0.1
+        acceleration_m1 = m1.calculate_magnitude_acceleration(m2)
+        acceleration_m2 = m2.calculate_magnitude_acceleration(m1)
 
-    for i in np.arange(0, 1000, 0.1):
+        m1.calculate_position(acceleration_m1, time_step)
+        m2.calculate_position(acceleration_m2, time_step)
 
-        accleration = float(Mass.calculate_Magnitute_Acceleration(m))
-
-        followingVelocityX = accleration * timediff + m.velocityX 
-        followingVelocityY = (accleration * timediff) + (m.velocityY)
-        followingVelocityZ = (accleration * timediff) + (m.velocityZ) 
-
-        diffposX = (followingVelocityX**2 - float(m.velocityX**2))/(2*accleration)
-        diffposY = (followingVelocityY**2 - float(m.velocityY**2))/(2*accleration)
-        diffposZ = (followingVelocityZ**2 - float(m.velocityZ**2))/(2*accleration)
-
-        m.x = m.x + diffposX
-        m.y = m.y + diffposY
-        m.z = m.z + diffposZ
-
-        m.velocityX = followingVelocityX
-        m.velocityY = followingVelocityY
-        m.velocityZ = followingVelocityZ
-
-        print(f" at time {i} {Mass.calculate_position(m)} ")
+        print(f"At time {_ * time_step}:")
+        print("m1 position:", m1.position)
+        print("m2 position:", m2.position)
 
 
-
-
-calculate_coordinate(m1)
-calculate_coordinate(m2)
+calculate_coordinates(m1, m2)
