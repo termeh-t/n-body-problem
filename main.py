@@ -97,6 +97,7 @@ trace_m1, = ax.plot([], [], [], 'b-', linewidth=1)
 trace_m2, = ax.plot([], [], [], 'r-', linewidth=1)
 
 def update(frame):
+    
     x1, y1, z1 = list_position_m1[frame]
     x2, y2, z2 = list_position_m2[frame]
 
